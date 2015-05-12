@@ -157,7 +157,7 @@ void GLWidget::paintGL()
 
     currentFrame++;
 
-    //paintText();
+    paintText();
     update();
 }
 void GLWidget::resizeGL(int width, int height)
@@ -170,20 +170,13 @@ void GLWidget::paintText()
     QString fpsOverlay = QString("FPS: %1").arg(currentFps);
     QString avgOverlay = QString("AVG: %1").arg(avgFrames);
 
-    const QRect drawRect(0, 0, 400, 400);
+    const QRect drawRect(0, 0, 300, 50);
     const QSize drawRectSize = drawRect.size();
 
-    QOpenGLFramebufferObjectFormat fboFormat;
-    fboFormat.setSamples(16);
-    fboFormat.setAttachment(QOpenGLFramebufferObject::CombinedDepthStencil);
-
-    QOpenGLFramebufferObject fbo(drawRectSize, fboFormat);
-    fbo.bind();
-
-    QOpenGLPaintDevice device(drawRectSize);
+    QImage img(drawRectSize, QImage::Format_ARGB32);
     QPainter painter;
 
-    painter.begin(&device);
+    painter.begin(&img);
     painter.setBackgroundMode(Qt::TransparentMode);
 
     QFont font = painter.font();
@@ -201,10 +194,12 @@ void GLWidget::paintText()
     painter.drawText(avgRect, Qt::TextSingleLine, avgOverlay);
 
     painter.end();
-    fbo.release();
 
-    glBindTexture(GL_TEXTURE_2D, fbo.texture());
+    QOpenGLTexture texture(img);
+    texture.bind();
+
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
 }
 
 void GLWidget::updateFps()
@@ -235,7 +230,7 @@ void GLWidget::makeObject()
     foreach(QFileInfo file, files) {
         QImage img;
         if (img.load(file.absoluteFilePath())) {
-            textures.append(new QOpenGLTexture(img.mirrored()));
+            textures.append(new QOpenGLTexture(img));
         }
     }
 
