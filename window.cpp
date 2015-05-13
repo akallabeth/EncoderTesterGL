@@ -51,7 +51,12 @@ Window::Window()
     clearColor.setHsv(42, 255, 63);
 
     QSurfaceFormat fmt = QSurfaceFormat::defaultFormat();
-    fmt.setSwapInterval(0);
+    QStringList args = QApplication::arguments();
+    QCommandLineParser parser;
+    QCommandLineOption vsync("vsync");
+    parser.addOption(vsync);
+    parser.process(args);
+    fmt.setSwapInterval(parser.isSet(vsync));
     QSurfaceFormat::setDefaultFormat(fmt);
 
     qDebug() << QSurfaceFormat::defaultFormat();
