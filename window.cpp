@@ -53,6 +53,7 @@ Window::Window()
     glWidgets = new GLWidget;
     glWidgets->setClearColor(clearColor);
 
+    mainLayout->setMargin(0);
     mainLayout->addWidget(glWidgets);
 
     setLayout(mainLayout);

@@ -44,6 +44,7 @@
 #include <QMouseEvent>
 #include <QApplication>
 #include <QDir>
+#include <QColormap>
 #include <QPainter>
 #include <QFileInfo>
 #include <QFileInfoList>
@@ -105,8 +106,11 @@ void GLWidget::initializeGL()
             "uniform mediump mat4 matrix;\n"
             "void main(void)\n"
             "{\n"
-            "    gl_Position = matrix * vertex;\n"
-            "    texc = texCoord;\n"
+            "    vec4 tmp = vertex;\n"
+
+            "    tmp = tmp * matrix;\n"
+            "    gl_Position = tmp;\n"
+            "    texc = texCoord * vec4(1.0, -1.0, 1.0, 1.0);\n"
             "}\n";
     vshader->compileSourceCode(vsrc);
 
@@ -116,7 +120,10 @@ void GLWidget::initializeGL()
             "varying mediump vec4 texc;\n"
             "void main(void)\n"
             "{\n"
-            "    gl_FragColor = texture2D(texture, texc.st);\n"
+            "    vec4 color = texture2D(texture, texc.st);\n"
+            "    if (color.a < 0.5)\n"
+            "        discard;\n"
+            "    gl_FragColor = color;\n"
             "}\n";
     fshader->compileSourceCode(fsrc);
 
@@ -135,6 +142,10 @@ void GLWidget::paintGL()
 {
     glClearColor(clearColor.redF(), clearColor.greenF(), clearColor.blueF(), clearColor.alphaF());
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable (GL_BLEND);
+    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    paintText();
 
     QMatrix4x4 m;
     m.ortho(-1.0f, +1.0f, +1.0f, -1.0f, 1.0f, -1.0f);
@@ -149,6 +160,7 @@ void GLWidget::paintGL()
 
     if (textures.size()) {
         textures[currentTexture]->bind();
+        glAlphaFunc(GL_GREATER, 0.0);
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
         currentTexture++;
@@ -157,11 +169,11 @@ void GLWidget::paintGL()
 
     currentFrame++;
 
-    paintText();
     update();
 }
 void GLWidget::resizeGL(int width, int height)
 {
+    qDebug() << width << "x" << height;
     glViewport(0, 0, width, height);
 }
 
@@ -170,17 +182,17 @@ void GLWidget::paintText()
     QString fpsOverlay = QString("FPS: %1").arg(currentFps);
     QString avgOverlay = QString("AVG: %1").arg(avgFrames);
 
-    const QRect drawRect(0, 0, 300, 50);
+    const QRect drawRect(0, 0, 150, 50);
     const QSize drawRectSize = drawRect.size();
 
     QImage img(drawRectSize, QImage::Format_ARGB32);
     QPainter painter;
 
     painter.begin(&img);
-    painter.setBackgroundMode(Qt::TransparentMode);
 
+    painter.setBackground(Qt::transparent);
     QFont font = painter.font();
-    font.setPointSize(24);
+    font.setPointSize(16);
     painter.setFont(font);
     painter.setPen(Qt::green);
     painter.setBrush(QBrush());
@@ -197,6 +209,17 @@ void GLWidget::paintText()
 
     QOpenGLTexture texture(img);
     texture.bind();
+
+    QMatrix4x4 m;
+    m.ortho(-12.0f, +12.0f, +12.0f, -12.0f, 1.0f, -1.0f);
+
+    program->setUniformValue("matrix", m);
+    program->enableAttributeArray(PROGRAM_VERTEX_ATTRIBUTE);
+    program->enableAttributeArray(PROGRAM_TEXCOORD_ATTRIBUTE);
+    program->setAttributeBuffer(PROGRAM_VERTEX_ATTRIBUTE, GL_FLOAT, 0,
+                                3, 5 * sizeof(GLfloat));
+    program->setAttributeBuffer(PROGRAM_TEXCOORD_ATTRIBUTE, GL_FLOAT,
+                                3 * sizeof(GLfloat), 2, 5 * sizeof(GLfloat));
 
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
