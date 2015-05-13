@@ -50,6 +50,12 @@ Window::Window()
     QColor clearColor;
     clearColor.setHsv(42, 255, 63);
 
+    QSurfaceFormat fmt = QSurfaceFormat::defaultFormat();
+    fmt.setSwapInterval(0);
+    QSurfaceFormat::setDefaultFormat(fmt);
+
+    qDebug() << QSurfaceFormat::defaultFormat();
+
     glWidgets = new GLWidget;
     glWidgets->setClearColor(clearColor);
 

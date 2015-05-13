@@ -165,8 +165,6 @@ void GLWidget::paintGL()
     }
 
     currentFrame++;
-
-    paintText();
     update();
 }
 void GLWidget::resizeGL(int width, int height)
