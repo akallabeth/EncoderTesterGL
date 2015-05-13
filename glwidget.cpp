@@ -106,7 +106,12 @@ void GLWidget::initializeGL()
             "void main(void)\n"
             "{\n"
             "    gl_Position = matrix * vertex;\n"
+            "    texc = texCoord;\n"
+            "    gl_Position = matrix * vertex;\n"
             "    texc = texCoord * vec4(1.0, -1.0, 1.0, 1.0);\n"
+
+
+
             "}\n";
     vshader->compileSourceCode(vsrc);
 
@@ -161,6 +166,7 @@ void GLWidget::paintGL()
 
     currentFrame++;
 
+    paintText();
     update();
 }
 void GLWidget::resizeGL(int width, int height)
@@ -182,9 +188,11 @@ void GLWidget::paintText()
     QPainter painter;
 
     painter.begin(&img);
+    painter.setBackgroundMode(Qt::TransparentMode);
 
     painter.setBackground(Qt::transparent);
     QFont font = painter.font();
+    font.setPointSize(24);
     font.setPointSize(16);
     painter.setFont(font);
     painter.setPen(Qt::green);

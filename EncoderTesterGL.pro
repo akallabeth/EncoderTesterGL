@@ -6,7 +6,7 @@ SOURCES       = glwidget.cpp \
 
 RESOURCES     = EncoderTesterGL.qrc
 
-QT           += widgets
+QT           += widgets gui
 
 # install
 # target.path = $$[QT_INSTALL_EXAMPLES]/opengl/textures
