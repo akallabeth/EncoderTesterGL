@@ -88,7 +88,10 @@ void GLWidget::setClearColor(const QColor &color)
 
 void GLWidget::setFpsLimit(int limit)
 {
-    mFpsTimePerFrame = 1000.0 / (limit * 1.0);
+    if (limit > 0)
+        mFpsTimePerFrame = 1000.0 / (limit * 1.0);
+    else
+        mFpsTimePerFrame = 0.0;
 }
 
 void GLWidget::initializeGL()
