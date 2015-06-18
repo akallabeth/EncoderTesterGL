@@ -54,8 +54,7 @@ Window::Window()
     QStringList args = QApplication::arguments();
     QCommandLineParser parser;
     QCommandLineOption vsync("vsync");
-    QCommandLineOption fpsLimit("maxFPS");
-    fpsLimit.setDefaultValue("0");
+    QCommandLineOption fpsLimit("maxFPS", "Limit FPS to value", "0", "0");
 
     parser.addOption(vsync);
     parser.addOption(fpsLimit);
