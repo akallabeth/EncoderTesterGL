@@ -54,14 +54,21 @@ Window::Window()
     QStringList args = QApplication::arguments();
     QCommandLineParser parser;
     QCommandLineOption vsync("vsync");
+    QCommandLineOption fpsLimit("maxFPS");
+    fpsLimit.setDefaultValue("0");
+
     parser.addOption(vsync);
+    parser.addOption(fpsLimit);
+
     parser.process(args);
     fmt.setSwapInterval(parser.isSet(vsync));
     QSurfaceFormat::setDefaultFormat(fmt);
 
     qDebug() << QSurfaceFormat::defaultFormat();
 
+    QString fps = parser.value(fpsLimit);
     glWidgets = new GLWidget;
+    glWidgets->setFpsLimit(fps.toInt());
     glWidgets->setClearColor(clearColor);
 
     mainLayout->setMargin(0);
