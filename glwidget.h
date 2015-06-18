@@ -86,7 +86,6 @@ private:
     double currentFps;
     double avgFrames;
     QTimer mTimer;
-    QTimer mFpsLimiter;
     int mFpsTimePerFrame;
 };
 

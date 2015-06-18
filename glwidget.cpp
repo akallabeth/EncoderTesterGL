@@ -61,7 +61,6 @@ GLWidget::GLWidget(QWidget *parent)
       avgFrames(0),
       mFpsTimePerFrame(0)
 {
-    connect(&mFpsLimiter, &QTimer::timeout, this, &GLWidget::update);
     connect(&mTimer, &QTimer::timeout, this, &GLWidget::updateFps);
     mTimer.start(1000);
 }
@@ -71,7 +70,7 @@ GLWidget::~GLWidget()
     makeCurrent();
     vbo.destroy();
     foreach(QOpenGLTexture *texture, textures)
-	delete texture;
+    delete texture;
     delete program;
     doneCurrent();
 }
@@ -106,32 +105,32 @@ void GLWidget::initializeGL()
 
     QOpenGLShader *vshader = new QOpenGLShader(QOpenGLShader::Vertex, this);
     const char *vsrc =
-	    "attribute highp vec4 vertex;\n"
-	    "attribute mediump vec4 texCoord;\n"
-	    "varying mediump vec4 texc;\n"
-	    "uniform mediump mat4 matrix;\n"
-	    "void main(void)\n"
-	    "{\n"
-	    "    gl_Position = matrix * vertex;\n"
-	    "    texc = texCoord;\n"
-	    "    gl_Position = matrix * vertex;\n"
-	    "    texc = texCoord * vec4(1.0, -1.0, 1.0, 1.0);\n"
+        "attribute highp vec4 vertex;\n"
+        "attribute mediump vec4 texCoord;\n"
+        "varying mediump vec4 texc;\n"
+        "uniform mediump mat4 matrix;\n"
+        "void main(void)\n"
+        "{\n"
+        "    gl_Position = matrix * vertex;\n"
+        "    texc = texCoord;\n"
+        "    gl_Position = matrix * vertex;\n"
+        "    texc = texCoord * vec4(1.0, -1.0, 1.0, 1.0);\n"
 
 
 
-	    "}\n";
+        "}\n";
     vshader->compileSourceCode(vsrc);
 
     QOpenGLShader *fshader = new QOpenGLShader(QOpenGLShader::Fragment, this);
     const char *fsrc =
-	    "uniform sampler2D texture;\n"
-	    "varying mediump vec4 texc;\n"
-	    "void main(void)\n"
-	    "{\n"
-	    "    gl_FragColor = texture2D(texture, texc.st);\n"
-	    "    if (gl_FragColor.a < 0.5)\n"
-	    "        discard;\n"
-	    "}\n";
+        "uniform sampler2D texture;\n"
+        "varying mediump vec4 texc;\n"
+        "void main(void)\n"
+        "{\n"
+        "    gl_FragColor = texture2D(texture, texc.st);\n"
+        "    if (gl_FragColor.a < 0.5)\n"
+        "        discard;\n"
+        "}\n";
     fshader->compileSourceCode(fsrc);
 
     program = new QOpenGLShaderProgram;
@@ -159,21 +158,21 @@ void GLWidget::paintGL()
     program->enableAttributeArray(PROGRAM_VERTEX_ATTRIBUTE);
     program->enableAttributeArray(PROGRAM_TEXCOORD_ATTRIBUTE);
     program->setAttributeBuffer(PROGRAM_VERTEX_ATTRIBUTE, GL_FLOAT, 0,
-				3, 5 * sizeof(GLfloat));
+                3, 5 * sizeof(GLfloat));
     program->setAttributeBuffer(PROGRAM_TEXCOORD_ATTRIBUTE, GL_FLOAT,
-				3 * sizeof(GLfloat), 2, 5 * sizeof(GLfloat));
+                3 * sizeof(GLfloat), 2, 5 * sizeof(GLfloat));
 
     if (textures.size()) {
-	textures[currentTexture]->bind();
-	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    textures[currentTexture]->bind();
+    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
-	currentTexture++;
-	currentTexture %= textures.size();
+    currentTexture++;
+    currentTexture %= textures.size();
     }
 
     currentFrame++;
 
-    mFpsLimiter.start(mFpsTimePerFrame);
+    QTimer::singleShot(mFpsTimePerFrame, this, SLOT(update()));
 }
 void GLWidget::resizeGL(int width, int height)
 {
@@ -224,9 +223,9 @@ void GLWidget::paintText()
     program->enableAttributeArray(PROGRAM_VERTEX_ATTRIBUTE);
     program->enableAttributeArray(PROGRAM_TEXCOORD_ATTRIBUTE);
     program->setAttributeBuffer(PROGRAM_VERTEX_ATTRIBUTE, GL_FLOAT, 0,
-				3, 5 * sizeof(GLfloat));
+                3, 5 * sizeof(GLfloat));
     program->setAttributeBuffer(PROGRAM_TEXCOORD_ATTRIBUTE, GL_FLOAT,
-				3 * sizeof(GLfloat), 2, 5 * sizeof(GLfloat));
+                3 * sizeof(GLfloat), 2, 5 * sizeof(GLfloat));
 
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
@@ -246,10 +245,10 @@ void GLWidget::updateFps()
 void GLWidget::makeObject()
 {
     static const int coords[4][3] = {
-	{ +1, -1, -1 },
-	{ -1, -1, -1 },
-	{ -1, +1, -1 },
-	{ +1, +1, -1 }
+    { +1, -1, -1 },
+    { -1, -1, -1 },
+    { -1, +1, -1 },
+    { +1, +1, -1 }
     };
 
     QString path = QApplication::applicationDirPath();
@@ -258,21 +257,21 @@ void GLWidget::makeObject()
     QFileInfoList files = dir.entryInfoList();
 
     foreach(QFileInfo file, files) {
-	QImage img;
-	if (img.load(file.absoluteFilePath())) {
-	    textures.append(new QOpenGLTexture(img));
-	}
+    QImage img;
+    if (img.load(file.absoluteFilePath())) {
+        textures.append(new QOpenGLTexture(img));
+    }
     }
 
     QVector<GLfloat> vertData;
     for (int j = 0; j < 4; ++j) {
-	// vertex position
-	vertData.append(coords[j][0]);
-	vertData.append(coords[j][1]);
-	vertData.append(coords[j][2]);
-	// texture coordinate
-	vertData.append(j == 0 || j == 3);
-	vertData.append(j == 0 || j == 1);
+    // vertex position
+    vertData.append(coords[j][0]);
+    vertData.append(coords[j][1]);
+    vertData.append(coords[j][2]);
+    // texture coordinate
+    vertData.append(j == 0 || j == 3);
+    vertData.append(j == 0 || j == 1);
     }
 
     vbo.create();
