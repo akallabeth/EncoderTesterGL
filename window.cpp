@@ -47,15 +47,21 @@ Window::Window()
 {
     QGridLayout *mainLayout = new QGridLayout;
 
+    QCoreApplication::setApplicationVersion("1.0.1");
+
     QColor clearColor;
     clearColor.setHsv(42, 255, 63);
 
     QSurfaceFormat fmt = QSurfaceFormat::defaultFormat();
     QStringList args = QApplication::arguments();
     QCommandLineParser parser;
-    QCommandLineOption vsync("vsync");
+    QCommandLineOption vsync("vsync", "enables vsync");
     QCommandLineOption fpsLimit("maxFPS", "Limit FPS to value", "0", "0");
 
+    parser.setApplicationDescription("Reads image files from current folder"
+                                     " to textures and renders them.");
+    parser.addHelpOption();
+    parser.addVersionOption();
     parser.addOption(vsync);
     parser.addOption(fpsLimit);
 
