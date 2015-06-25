@@ -57,16 +57,19 @@ Window::Window()
     QCommandLineParser parser;
     QCommandLineOption vsync("vsync", "enables vsync");
     QCommandLineOption fpsLimit("maxFPS", "Limit FPS to value", "0", "0");
+    QCommandLineOption hideFpsOverlay("hideFPSOverlay", "Hide FPS overlay");
 
     parser.setApplicationDescription("Reads image files from current folder"
-                                     " to textures and renders them.");
+				     " to textures and renders them.");
     parser.addHelpOption();
     parser.addVersionOption();
     parser.addOption(vsync);
     parser.addOption(fpsLimit);
+    parser.addOption(hideFpsOverlay);
 
     parser.process(args);
     fmt.setSwapInterval(parser.isSet(vsync));
+
     QSurfaceFormat::setDefaultFormat(fmt);
 
     qDebug() << QSurfaceFormat::defaultFormat();
@@ -74,6 +77,7 @@ Window::Window()
     QString fps = parser.value(fpsLimit);
     glWidgets = new GLWidget;
     glWidgets->setFpsLimit(fps.toInt());
+    glWidgets->setFpsOverlay(!parser.isSet(hideFpsOverlay));
     glWidgets->setClearColor(clearColor);
 
     mainLayout->setMargin(0);

@@ -59,6 +59,7 @@ public:
     QSize minimumSizeHint() const Q_DECL_OVERRIDE;
     void setClearColor(const QColor &color);
     void setFpsLimit(int limit);
+    void setFpsOverlay(bool enabled);
 
 signals:
     void clicked();
@@ -87,6 +88,7 @@ private:
     double avgFrames;
     QTimer mTimer;
     double mFpsTimePerFrame;
+    bool mFpsOverlay;
 };
 
 #endif

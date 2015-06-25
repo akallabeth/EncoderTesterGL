@@ -89,9 +89,14 @@ void GLWidget::setClearColor(const QColor &color)
 void GLWidget::setFpsLimit(int limit)
 {
     if (limit > 0)
-        mFpsTimePerFrame = 1000.0 / (limit * 1.0);
+    mFpsTimePerFrame = 1000.0 / (limit * 1.0);
     else
-        mFpsTimePerFrame = 0.0;
+    mFpsTimePerFrame = 0.0;
+}
+
+void GLWidget::setFpsOverlay(bool enabled)
+{
+    mFpsOverlay = enabled;
 }
 
 void GLWidget::initializeGL()
@@ -108,32 +113,32 @@ void GLWidget::initializeGL()
 
     QOpenGLShader *vshader = new QOpenGLShader(QOpenGLShader::Vertex, this);
     const char *vsrc =
-        "attribute highp vec4 vertex;\n"
-        "attribute mediump vec4 texCoord;\n"
-        "varying mediump vec4 texc;\n"
-        "uniform mediump mat4 matrix;\n"
-        "void main(void)\n"
-        "{\n"
-        "    gl_Position = matrix * vertex;\n"
-        "    texc = texCoord;\n"
-        "    gl_Position = matrix * vertex;\n"
-        "    texc = texCoord * vec4(1.0, -1.0, 1.0, 1.0);\n"
+    "attribute highp vec4 vertex;\n"
+    "attribute mediump vec4 texCoord;\n"
+    "varying mediump vec4 texc;\n"
+    "uniform mediump mat4 matrix;\n"
+    "void main(void)\n"
+    "{\n"
+    "    gl_Position = matrix * vertex;\n"
+    "    texc = texCoord;\n"
+    "    gl_Position = matrix * vertex;\n"
+    "    texc = texCoord * vec4(1.0, -1.0, 1.0, 1.0);\n"
 
 
 
-        "}\n";
+    "}\n";
     vshader->compileSourceCode(vsrc);
 
     QOpenGLShader *fshader = new QOpenGLShader(QOpenGLShader::Fragment, this);
     const char *fsrc =
-        "uniform sampler2D texture;\n"
-        "varying mediump vec4 texc;\n"
-        "void main(void)\n"
-        "{\n"
-        "    gl_FragColor = texture2D(texture, texc.st);\n"
-        "    if (gl_FragColor.a < 0.5)\n"
-        "        discard;\n"
-        "}\n";
+    "uniform sampler2D texture;\n"
+    "varying mediump vec4 texc;\n"
+    "void main(void)\n"
+    "{\n"
+    "    gl_FragColor = texture2D(texture, texc.st);\n"
+    "    if (gl_FragColor.a < 0.5)\n"
+    "        discard;\n"
+    "}\n";
     fshader->compileSourceCode(fsrc);
 
     program = new QOpenGLShaderProgram;
@@ -152,6 +157,7 @@ void GLWidget::paintGL()
     glClearColor(clearColor.redF(), clearColor.greenF(), clearColor.blueF(), clearColor.alphaF());
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    if (mFpsOverlay)
     paintText();
 
     QMatrix4x4 m;
@@ -161,9 +167,9 @@ void GLWidget::paintGL()
     program->enableAttributeArray(PROGRAM_VERTEX_ATTRIBUTE);
     program->enableAttributeArray(PROGRAM_TEXCOORD_ATTRIBUTE);
     program->setAttributeBuffer(PROGRAM_VERTEX_ATTRIBUTE, GL_FLOAT, 0,
-                3, 5 * sizeof(GLfloat));
+        3, 5 * sizeof(GLfloat));
     program->setAttributeBuffer(PROGRAM_TEXCOORD_ATTRIBUTE, GL_FLOAT,
-                3 * sizeof(GLfloat), 2, 5 * sizeof(GLfloat));
+        3 * sizeof(GLfloat), 2, 5 * sizeof(GLfloat));
 
     if (textures.size()) {
     textures[currentTexture]->bind();
@@ -226,9 +232,9 @@ void GLWidget::paintText()
     program->enableAttributeArray(PROGRAM_VERTEX_ATTRIBUTE);
     program->enableAttributeArray(PROGRAM_TEXCOORD_ATTRIBUTE);
     program->setAttributeBuffer(PROGRAM_VERTEX_ATTRIBUTE, GL_FLOAT, 0,
-                3, 5 * sizeof(GLfloat));
+        3, 5 * sizeof(GLfloat));
     program->setAttributeBuffer(PROGRAM_TEXCOORD_ATTRIBUTE, GL_FLOAT,
-                3 * sizeof(GLfloat), 2, 5 * sizeof(GLfloat));
+        3 * sizeof(GLfloat), 2, 5 * sizeof(GLfloat));
 
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
@@ -262,7 +268,7 @@ void GLWidget::makeObject()
     foreach(QFileInfo file, files) {
     QImage img;
     if (img.load(file.absoluteFilePath())) {
-        textures.append(new QOpenGLTexture(img));
+    textures.append(new QOpenGLTexture(img));
     }
     }
 
